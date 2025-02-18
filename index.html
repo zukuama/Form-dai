@@ -5,21 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Venta</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
-        body {
-            padding: 20px;
-        }
         #mensaje {
             display: none;
-            text-align: center;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            padding: 15px;
+            font-size: 16px;
             font-weight: bold;
-            margin-top: 10px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 280px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container mt-4">
         <h2 class="text-center">Registro de Venta</h2>
+
         <div id="mensaje"></div>
 
         <form id="ventaForm">
@@ -33,17 +40,41 @@
             </div>
 
             <div class="row">
-                <div class="col-6">
+                <div class="col-12 col-md-3">
                     <label class="form-label">500cc</label>
                     <input type="number" class="form-control" id="cantidad500" value="0" min="0">
                 </div>
-                <div class="col-6">
+                <div class="col-12 col-md-3">
+                    <label class="form-label">Precio 500cc</label>
+                    <input type="text" class="form-control" id="precio500" value="1500" readonly>
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label">Total 500cc</label>
+                    <input type="text" class="form-control" id="total500" readonly>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12 col-md-3">
                     <label class="form-label">1000cc</label>
                     <input type="number" class="form-control" id="cantidad1000" value="0" min="0">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label">Precio 1000cc</label>
+                    <input type="text" class="form-control" id="precio1000" value="3000" readonly>
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label">Total 1000cc</label>
+                    <input type="text" class="form-control" id="total1000" readonly>
                 </div>
             </div>
 
             <div class="mb-3 mt-3">
+                <label class="form-label">Total Venta</label>
+                <input type="text" class="form-control" id="totalVenta" readonly>
+            </div>
+
+            <div class="mb-3">
                 <label class="form-label">Forma de Pago</label>
                 <select class="form-control" id="formaPago">
                     <option value="Transferencia">Transferencia</option>
@@ -60,16 +91,45 @@
                 </select>
             </div>
 
-            <div class="mb-3">
+            <div class="row">
+                <div class="col-12 col-md-4">
+                    <label class="form-label">Vacío de 500cc</label>
+                    <input type="number" class="form-control" id="vacio500" value="0" min="0">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label">Vacío de 1000cc</label>
+                    <input type="number" class="form-control" id="vacio1000" value="0" min="0">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label">Stock Cliente</label>
+                    <input type="number" class="form-control" id="stockCliente" value="0" min="0">
+                </div>
+            </div>
+
+            <div class="mb-3 mt-3">
                 <label class="form-label">Observaciones</label>
                 <textarea class="form-control" id="observaciones"></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Registrar Venta</button>
+            <button type="submit" class="btn btn-primary w-100 btn-lg">Registrar Venta</button>
         </form>
     </div>
 
     <script>
+        function calcularTotales() {
+            let cantidad500 = parseInt(document.getElementById('cantidad500').value) || 0;
+            let cantidad1000 = parseInt(document.getElementById('cantidad1000').value) || 0;
+            let precio500 = parseInt(document.getElementById('precio500').value);
+            let precio1000 = parseInt(document.getElementById('precio1000').value);
+
+            document.getElementById('total500').value = cantidad500 * precio500;
+            document.getElementById('total1000').value = cantidad1000 * precio1000;
+            document.getElementById('totalVenta').value = (cantidad500 * precio500) + (cantidad1000 * precio1000);
+        }
+
+        document.getElementById('cantidad500').addEventListener('input', calcularTotales);
+        document.getElementById('cantidad1000').addEventListener('input', calcularTotales);
+
         document.getElementById('ventaForm').addEventListener('submit', function (event) {
             event.preventDefault();
 
@@ -77,35 +137,40 @@
                 nombre: document.getElementById('nombre').value,
                 dni: document.getElementById('dni').value,
                 cantidad500: document.getElementById('cantidad500').value,
+                precio500: document.getElementById('precio500').value,
+                total500: document.getElementById('total500').value,
                 cantidad1000: document.getElementById('cantidad1000').value,
+                precio1000: document.getElementById('precio1000').value,
+                total1000: document.getElementById('total1000').value,
+                totalVenta: document.getElementById('totalVenta').value,
                 formaPago: document.getElementById('formaPago').value,
                 pago: document.getElementById('pago').value,
+                vacio500: document.getElementById('vacio500').value,
+                vacio1000: document.getElementById('vacio1000').value,
+                stockCliente: document.getElementById('stockCliente').value,
                 observaciones: document.getElementById('observaciones').value
             };
 
-            fetch('https://script.google.com/macros/s/AKfycbxPg1PsurYY2TT7GeJQw9tLNmYltU5jNRYOImfWvvijkckDo_rQU3eNYi2xYd4bGK1bOw/exec', {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => response.json())
-            .then(respuesta => {
-                let mensajeDiv = document.getElementById('mensaje');
-                mensajeDiv.innerHTML = respuesta.success 
-                    ? `<div class="alert alert-success">✅ ${respuesta.mensaje}</div>` 
-                    : `<div class="alert alert-danger">❌ ${respuesta.mensaje}</div>`;
-                
-                mensajeDiv.style.display = "block";
+            google.script.run
+                .withSuccessHandler(function (respuesta) {
+                    let mensajeDiv = document.getElementById('mensaje');
 
-                setTimeout(() => {
-                    mensajeDiv.style.display = "none";
-                }, 2000);
+                    mensajeDiv.innerHTML = respuesta.success 
+                        ? `<div class="alert alert-success">✅ ${respuesta.mensaje}</div>` 
+                        : `<div class="alert alert-danger">❌ ${respuesta.mensaje}</div>`;
 
-                if (respuesta.success) {
-                    document.getElementById('ventaForm').reset();
-                }
-            })
-            .catch(error => console.error('Error:', error));
+                    mensajeDiv.style.display = "block";
+
+                    setTimeout(() => {
+                        mensajeDiv.style.display = "none";
+                    }, 2000);
+
+                    if (respuesta.success) {
+                        document.getElementById('ventaForm').reset();
+                        calcularTotales();
+                    }
+                })
+                .guardarDatos(data);
         });
     </script>
 </body>
