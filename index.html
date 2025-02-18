@@ -116,62 +116,82 @@
     </div>
 
     <script>
-        function calcularTotales() {
-            let cantidad500 = parseInt(document.getElementById('cantidad500').value) || 0;
-            let cantidad1000 = parseInt(document.getElementById('cantidad1000').value) || 0;
-            let precio500 = parseInt(document.getElementById('precio500').value);
-            let precio1000 = parseInt(document.getElementById('precio1000').value);
+        document.addEventListener('DOMContentLoaded', function () {
+    // Función para calcular los totales automáticamente
+    function calcularTotales() {
+        let cantidad500 = parseInt(document.getElementById('cantidad500').value) || 0;
+        let cantidad1000 = parseInt(document.getElementById('cantidad1000').value) || 0;
+        let precio500 = parseInt(document.getElementById('precio500').value);
+        let precio1000 = parseInt(document.getElementById('precio1000').value);
 
-            document.getElementById('total500').value = cantidad500 * precio500;
-            document.getElementById('total1000').value = cantidad1000 * precio1000;
-            document.getElementById('totalVenta').value = (cantidad500 * precio500) + (cantidad1000 * precio1000);
-        }
+        document.getElementById('total500').value = cantidad500 * precio500;
+        document.getElementById('total1000').value = cantidad1000 * precio1000;
+        document.getElementById('totalVenta').value = (cantidad500 * precio500) + (cantidad1000 * precio1000);
+    }
 
-        document.getElementById('cantidad500').addEventListener('input', calcularTotales);
-        document.getElementById('cantidad1000').addEventListener('input', calcularTotales);
+    // Eventos para calcular los totales cuando el usuario cambia cantidades
+    document.getElementById('cantidad500').addEventListener('input', calcularTotales);
+    document.getElementById('cantidad1000').addEventListener('input', calcularTotales);
 
-        document.getElementById('ventaForm').addEventListener('submit', function (event) {
-            event.preventDefault();
+    // Captura el formulario y envía los datos a Google Apps Script
+    document.getElementById('ventaForm').addEventListener('submit', function (event) {
+        event.preventDefault();
 
-            let data = {
-                nombre: document.getElementById('nombre').value,
-                dni: document.getElementById('dni').value,
-                cantidad500: document.getElementById('cantidad500').value,
-                precio500: document.getElementById('precio500').value,
-                total500: document.getElementById('total500').value,
-                cantidad1000: document.getElementById('cantidad1000').value,
-                precio1000: document.getElementById('precio1000').value,
-                total1000: document.getElementById('total1000').value,
-                totalVenta: document.getElementById('totalVenta').value,
-                formaPago: document.getElementById('formaPago').value,
-                pago: document.getElementById('pago').value,
-                vacio500: document.getElementById('vacio500').value,
-                vacio1000: document.getElementById('vacio1000').value,
-                stockCliente: document.getElementById('stockCliente').value,
-                observaciones: document.getElementById('observaciones').value
-            };
+        let data = {
+            nombre: document.getElementById('nombre').value,
+            dni: document.getElementById('dni').value,
+            cantidad500: document.getElementById('cantidad500').value,
+            precio500: document.getElementById('precio500').value,
+            total500: document.getElementById('total500').value,
+            cantidad1000: document.getElementById('cantidad1000').value,
+            precio1000: document.getElementById('precio1000').value,
+            total1000: document.getElementById('total1000').value,
+            totalVenta: document.getElementById('totalVenta').value,
+            formaPago: document.getElementById('formaPago').value,
+            pago: document.getElementById('pago').value,
+            vacio500: document.getElementById('vacio500').value,
+            vacio1000: document.getElementById('vacio1000').value,
+            stockCliente: document.getElementById('stockCliente').value,
+            observaciones: document.getElementById('observaciones').value
+        };
 
-            google.script.run
-                .withSuccessHandler(function (respuesta) {
-                    let mensajeDiv = document.getElementById('mensaje');
+        fetch('https://script.google.com/macros/s/AKfycbxPg1PsurYY2TT7GeJQw9tLNmYltU5jNRYOImfWvvijkckDo_rQU3eNYi2xYd4bGK1bOw/exec', { // Reemplaza con tu URL de Apps Script
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(respuesta => {
+            let mensajeDiv = document.getElementById('mensaje');
 
-                    mensajeDiv.innerHTML = respuesta.success 
-                        ? `<div class="alert alert-success">✅ ${respuesta.mensaje}</div>` 
-                        : `<div class="alert alert-danger">❌ ${respuesta.mensaje}</div>`;
+            mensajeDiv.innerHTML = respuesta.success 
+                ? `<div class="alert alert-success">✅ ${respuesta.mensaje}</div>` 
+                : `<div class="alert alert-danger">❌ ${respuesta.mensaje}</div>`;
 
-                    mensajeDiv.style.display = "block";
+            mensajeDiv.style.display = "block";
 
-                    setTimeout(() => {
-                        mensajeDiv.style.display = "none";
-                    }, 2000);
+            setTimeout(() => {
+                mensajeDiv.style.display = "none";
+            }, 2000);
 
-                    if (respuesta.success) {
-                        document.getElementById('ventaForm').reset();
-                        calcularTotales();
-                    }
-                })
-                .guardarDatos(data);
+            if (respuesta.success) {
+                document.getElementById('ventaForm').reset();
+                calcularTotales();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            let mensajeDiv = document.getElementById('mensaje');
+            mensajeDiv.innerHTML = `<div class="alert alert-danger">❌ Error al enviar los datos.</div>`;
+            mensajeDiv.style.display = "block";
+
+            setTimeout(() => {
+                mensajeDiv.style.display = "none";
+            }, 2000);
         });
+    });
+});
+
     </script>
 </body>
 </html>
